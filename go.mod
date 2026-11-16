@@ -36,3 +36,7 @@ require (
 	golang.org/x/net v0.33.0 // indirect
 	golang.org/x/sys v0.32.0 // indirect
 )
+
+replace github.com/charmbracelet/lipgloss => github.com/ikasty/lipgloss v0.0.0-20261116060024-09058b5ab3bd
+
+replace github.com/muesli/reflow => github.com/ikasty/reflow v0.0.0-20261116055931-336f7d84bd2e
