@@ -3,11 +3,8 @@ package ansi
 import (
 	"bytes"
 	"fmt"
-	"hash/fnv"
 	"io"
 	"net/url"
-
-	"github.com/charmbracelet/x/ansi"
 )
 
 // A LinkElement is used to render hyperlinks.
@@ -92,21 +89,12 @@ func (e *LinkElement) renderHrefPart(w io.Writer, ctx RenderContext) error {
 }
 
 // makeHyperlink takes a URL and returns an OSC 8 hyperlink token.
+//
+// 로컬 패치: OSC 8 을 내지 않는다 (빈 토큰을 돌려준다). URL 은 본문에 그대로 찍히므로
+// 링크를 잃지 않고, 상대경로·원격 세션에서는 클릭해도 열 곳이 없다. 또 퍼센트 인코딩하지
+// 않은 한글 URL 을 줄바꿈이 OSC 시퀀스 중간(UTF-8 바이트 사이)에서 잘라 글자가 화면에 샜다.
 func makeHyperlink(link string) (string, string, bool) {
-	// Make OSC 8 hyperlink token.
-	var hyperlink, resetHyperlink string
-
 	u, err := url.Parse(link)
 	validURL := err == nil && "#"+u.Fragment != link // if the URL only consists of an anchor, ignore it
-	if validURL {
-		h := fnv.New32a()
-		if _, err := io.WriteString(h, link); err != nil {
-			return "", "", false
-		}
-		urlID := fmt.Sprintf("id=%d", h.Sum32())
-		hyperlink = ansi.SetHyperlink(link, urlID)
-		resetHyperlink = ansi.ResetHyperlink()
-	}
-
-	return hyperlink, resetHyperlink, validURL
+	return "", "", validURL
 }
