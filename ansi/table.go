@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"strings"
 
 	"charm.land/lipgloss/v2"
 	"charm.land/lipgloss/v2/table"
@@ -116,6 +117,10 @@ func (e *TableElement) setBorders(ctx RenderContext) {
 			Middle: *rules.CenterSeparator,
 		}
 	}
+	// 좌우 테두리를 끄므로 행 구분선 양끝 문자도 비운다.
+	// lipgloss 는 BorderRow 구분선에 MiddleLeft/Right 를 무조건 붙인다 (헤더 구분선과 달리).
+	border.MiddleLeft = ""
+	border.MiddleRight = ""
 	ctx.table.lipgloss.Border(border)
 	ctx.table.lipgloss.BorderTop(false)
 	ctx.table.lipgloss.BorderLeft(false)
@@ -136,8 +141,16 @@ func (e *TableElement) Finish(_ io.Writer, ctx RenderContext) error {
 	e.setStyles(ctx)
 	e.setBorders(ctx)
 
+	// 줄바꿈된 행이 하나라도 있으면 행 사이에 구분선을 넣는다 (로컬 패치).
+	// 한 줄짜리 행만 있는 표는 헤더 1줄 + 구분선 1줄 + 행 수 만큼이 되므로, 그보다 길면 줄바꿈이 있다.
+	out := ctx.table.lipgloss.String()
+	rows := e.table.ChildCount() - 1 // 첫 자식은 TableHeader
+	if rows > 1 && strings.Count(strings.TrimRight(out, "\n"), "\n")+1 > rows+2 {
+		out = ctx.table.lipgloss.BorderRow(true).String()
+	}
+
 	ow := ctx.blockStack.Current().Block
-	if _, err := ow.WriteString(ctx.table.lipgloss.String()); err != nil {
+	if _, err := ow.WriteString(out); err != nil {
 		return fmt.Errorf("glamour: error writing to buffer: %w", err)
 	}
 
