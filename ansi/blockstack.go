@@ -2,6 +2,8 @@ package ansi
 
 import (
 	"bytes"
+
+	"github.com/mattn/go-runewidth"
 )
 
 // BlockStack is a stack of block elements, used to calculate the current
@@ -59,10 +61,11 @@ func (s BlockStack) Margin() uint {
 
 // Width returns the available rendering width.
 func (s BlockStack) Width(ctx RenderContext) uint {
-	if s.Indent()+s.Margin()*2 > uint(ctx.options.WordWrap) {
+	indentW := s.IndentVisualWidth()
+	if indentW+s.Margin()*2 > uint(ctx.options.WordWrap) {
 		return 0
 	}
-	return uint(ctx.options.WordWrap) - s.Indent() - s.Margin()*2
+	return uint(ctx.options.WordWrap) - indentW - s.Margin()*2
 }
 
 // Parent returns the current BlockElement's parent.
@@ -92,4 +95,21 @@ func (s BlockStack) With(child StylePrimitive) StylePrimitive {
 	sb := StyleBlock{}
 	sb.StylePrimitive = child
 	return cascadeStyle(s.Current().Style, sb, false).StylePrimitive
+}
+
+// IndentVisualWidth returns the display width of all indent tokens in the stack
+// (backport of charmbracelet/glamour#560).
+func (s BlockStack) IndentVisualWidth() uint {
+	var w uint
+	for _, v := range s {
+		if v.Style.Indent == nil {
+			continue
+		}
+		token := " "
+		if v.Style.IndentToken != nil {
+			token = *v.Style.IndentToken
+		}
+		w += uint(runewidth.StringWidth(token)) * (*v.Style.Indent) //nolint:gosec
+	}
+	return w
 }
