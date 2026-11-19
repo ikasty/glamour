@@ -1,6 +1,6 @@
                                                                                 
  Name    │ Description                              │ Type │ Required │ Default 
-─────────┼──────────────────────────────────────────┼──────┼──────────┼─────────
+═════════╪══════════════════════════════════════════╪══════╪══════════╪═════════
  command │ A command to be executed inside the      │ yes  │ hello    │ yep     
          │ container to assess its health. Each     │      │          │         
          │ space delimited token of the command is  │      │          │         

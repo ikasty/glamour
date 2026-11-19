@@ -117,6 +117,11 @@ func (e *TableElement) setBorders(ctx RenderContext) {
 			Middle: *rules.CenterSeparator,
 		}
 	}
+	// 스타일이 구분선을 지정하지 않았으면 헤더 구분선을 ═ 로 그려 행 구분선(─)과 구별한다 (로컬 패치).
+	// 교차점은 행 구분선과 같은 Middle(┼)을 쓰므로 Finish 에서 헤더 줄만 ╪ 로 바꾼다.
+	if rules.RowSeparator == nil {
+		border.Top = headerSep
+	}
 	// 좌우 테두리를 끄므로 행 구분선 양끝 문자도 비운다.
 	// lipgloss 는 BorderRow 구분선에 MiddleLeft/Right 를 무조건 붙인다 (헤더 구분선과 달리).
 	border.MiddleLeft = ""
@@ -147,6 +152,10 @@ func (e *TableElement) Finish(_ io.Writer, ctx RenderContext) error {
 	rows := e.table.ChildCount() - 1 // 첫 자식은 TableHeader
 	if rows > 1 && strings.Count(strings.TrimRight(out, "\n"), "\n")+1 > rows+2 {
 		out = ctx.table.lipgloss.BorderRow(true).String()
+	}
+
+	if rules.RowSeparator == nil {
+		out = fixHeaderCross(out)
 	}
 
 	ow := ctx.blockStack.Current().Block
@@ -216,4 +225,20 @@ func (e *TableCellElement) Render(_ io.Writer, ctx RenderContext) error {
 	}
 
 	return nil
+}
+
+const headerSep = "═"
+
+// fixHeaderCross 는 ═ 와 ┼ 로만 이뤄진 헤더 구분선 줄의 교차점을 ╪ 로 바꾼다.
+// 테두리에는 스타일(ANSI)을 입히지 않으므로 줄 내용을 그대로 비교할 수 있다.
+func fixHeaderCross(out string) string {
+	lines := strings.Split(out, "\n")
+	for i, l := range lines {
+		t := strings.TrimSpace(l)
+		if t != "" && strings.Trim(t, headerSep+"┼") == "" && strings.Contains(t, headerSep) {
+			lines[i] = strings.ReplaceAll(l, "┼", "╪")
+			break
+		}
+	}
+	return strings.Join(lines, "\n")
 }
