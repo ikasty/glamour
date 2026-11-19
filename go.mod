@@ -10,6 +10,7 @@ require (
 	github.com/charmbracelet/x/ansi v0.8.0
 	github.com/charmbracelet/x/exp/golden v0.0.0-20240806155701-69247e0abc2a
 	github.com/charmbracelet/x/exp/slice v0.0.0-20250327172914-2fdc97757edf
+	github.com/mattn/go-runewidth v0.0.16
 	github.com/microcosm-cc/bluemonday v1.0.27
 	github.com/muesli/reflow v0.3.0
 	github.com/muesli/termenv v0.16.0
@@ -30,13 +31,12 @@ require (
 	github.com/gorilla/css v1.0.1 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/mattn/go-runewidth v0.0.16 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	golang.org/x/net v0.33.0 // indirect
 	golang.org/x/sys v0.32.0 // indirect
 )
 
-replace github.com/charmbracelet/lipgloss => github.com/ikasty/lipgloss v0.0.0-20261116060024-09058b5ab3bd
+replace github.com/charmbracelet/lipgloss => github.com/ikasty/lipgloss v0.0.0-20261119120640-98623cb604a9
 
 replace github.com/muesli/reflow => github.com/ikasty/reflow v0.0.0-20261116055931-336f7d84bd2e
